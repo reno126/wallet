@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  wallets       Wallet[]
 
   @@unique([email])
   @@map("user")
@@ -74,4 +75,56 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+
+model Wallet {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets    Asset[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Asset {
+  id             String          @id @default(cuid())
+  walletId       String
+  wallet         Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  ticker         String
+  name           String
+  lastPrice      Decimal         @db.Decimal(18, 8)
+  priceUpdatedAt DateTime        @updatedAt
+  currency       String
+  totalQuantity  Decimal         @db.Decimal(18, 8)
+  purchaseValue  Decimal         @db.Decimal(18, 8)
+  currentValue   Decimal         @db.Decimal(18, 8)
+  history        AssetHistory[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([walletId])
+  @@index([walletId, ticker])
+}
+
+model AssetHistory {
+  id            String        @id @default(cuid())
+  assetId       String
+  asset         Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  price         Decimal       @db.Decimal(18, 8)
+  quantity      Decimal       @db.Decimal(18, 8)
+  operationType OperationType
+  date          DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+
+  @@index([assetId])
+  @@index([assetId, date])
+}
+
+enum OperationType {
+  BUY
+  SELL
 }
