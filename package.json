@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build-vercel": "next build && prisma generate"
+    "build-vercel": "prisma generate && next build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.1",
