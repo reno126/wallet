@@ -77,7 +77,6 @@ model Verification {
   @@map("verification")
 }
 
-
 model Wallet {
   id        String   @id @default(cuid())
   name      String
@@ -91,20 +90,20 @@ model Wallet {
 }
 
 model Asset {
-  id             String          @id @default(cuid())
+  id             String         @id @default(cuid())
   walletId       String
-  wallet         Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  wallet         Wallet         @relation(fields: [walletId], references: [id], onDelete: Cascade)
   ticker         String
   name           String
-  lastPrice      Decimal         @db.Decimal(18, 8)
-  priceUpdatedAt DateTime        @updatedAt
+  lastPrice      Decimal?       @db.Decimal(18, 8)
+  priceUpdatedAt DateTime?
   currency       String
-  totalQuantity  Decimal         @db.Decimal(18, 8)
-  purchaseValue  Decimal         @db.Decimal(18, 8)
-  currentValue   Decimal         @db.Decimal(18, 8)
+  totalQuantity  Decimal?       @db.Decimal(18, 8)
+  purchaseValue  Decimal?       @db.Decimal(18, 8)
+  currentValue   Decimal?       @db.Decimal(18, 8)
   history        AssetHistory[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([walletId])
   @@index([walletId, ticker])

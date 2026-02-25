@@ -1,21 +1,24 @@
 "use client";
 
-import { walletNewSchema } from "@/schemas/walletNewSchema";
-import { walletCreate } from "@/serverActions/walletCreate";
+import { assetNewSchema } from "@/schemas/assetNewSchema";
+import { assetCreate } from "@/serverActions/assetCreate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export type WalletNewFormValues = z.infer<typeof walletNewSchema>;
+export type AssetNewFormValues = Omit<
+  z.infer<typeof assetNewSchema>,
+  "walletId"
+>;
 
-export default function WalletNewForm() {
+export default function AssetNewForm({ walletId }: { walletId: string }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<WalletNewFormValues>({
-    resolver: zodResolver(walletNewSchema),
+  const form = useForm<AssetNewFormValues>({
+    resolver: zodResolver(assetNewSchema.omit({ walletId: true })),
     defaultValues: {
-      name: "",
+      currency: "USD",
     },
     mode: "onSubmit",
   });
@@ -27,14 +30,18 @@ export default function WalletNewForm() {
   } = form;
 
   const submitHandler = handleSubmit(async (values) => {
+    console.log("Submitting asset:", {
+      walletId,
+      ...values,
+    });
     setSubmitError(null);
     try {
-      await walletCreate({ name: values.name });
+      await assetCreate({ walletId, ...values });
     } catch (error) {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Failed to create wallet (unknown error).",
+          : "Failed to create asset (unknown error).",
       );
     }
   });
@@ -42,18 +49,24 @@ export default function WalletNewForm() {
   return (
     <form onSubmit={submitHandler}>
       <fieldset disabled={isSubmitting}>
-        <legend>New wallet</legend>
+        <legend>New asset</legend>
 
         <div>
-          <label htmlFor="name">Wallet name</label>
+          <label htmlFor="name">Asset name</label>
           <input id="name" type="text" {...register("name")} />
           {errors.name && <p>{errors.name.message}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="ticker">Ticker</label>
+          <input id="ticker" type="text" {...register("ticker")} />
+          {errors.ticker && <p>{errors.ticker.message}</p>}
         </div>
 
         {submitError && <p>{submitError}</p>}
 
         <button type="submit">
-          {isSubmitting ? "Saving..." : "Create wallet"}
+          {isSubmitting ? "Saving..." : "Create asset"}
         </button>
       </fieldset>
     </form>

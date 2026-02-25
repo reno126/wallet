@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Asset" ALTER COLUMN "lastPrice" DROP NOT NULL,
+ALTER COLUMN "priceUpdatedAt" DROP NOT NULL,
+ALTER COLUMN "totalQuantity" DROP NOT NULL,
+ALTER COLUMN "purchaseValue" DROP NOT NULL,
+ALTER COLUMN "currentValue" DROP NOT NULL;

@@ -1,19 +1,12 @@
 "use server";
 import "server-only";
 import prisma from "@/lib/prisma";
-import { userId } from "@/lib/session";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
+
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
-
-const walletNewSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Wallet name is required.")
-    .max(80, "Wallet name must be at most 80 characters."),
-});
+import { walletNewSchema } from "@/schemas/walletNewSchema";
+import { getUserId } from "@/lib/session";
 
 interface WalletCreateProps {
   name: string;
@@ -22,6 +15,8 @@ interface WalletCreateProps {
 export type WalletCreateAction = typeof walletCreate;
 
 export async function walletCreate({ name }: Readonly<WalletCreateProps>) {
+  const userId = await getUserId();
+
   if (!userId) {
     throw new Error("Unauthorized");
   }
