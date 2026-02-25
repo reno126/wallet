@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
-import { walletNewSchema } from "@/schemas/walletNewSchema";
+import { walletSchema } from "@/schemas/walletNewSchema";
 import { getUserId } from "@/lib/session";
 
 interface WalletCreateProps {
@@ -21,7 +21,7 @@ export async function walletCreate({ name }: Readonly<WalletCreateProps>) {
     throw new Error("Unauthorized");
   }
 
-  const validation = walletNewSchema.safeParse({ name });
+  const validation = walletSchema.safeParse({ name });
 
   if (!validation.success) {
     throw new Error(validation.error.name);

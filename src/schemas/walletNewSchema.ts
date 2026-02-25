@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const walletNewSchema = z.object({
+export const walletSchema = z.object({
   name: z
     .string()
     .trim()

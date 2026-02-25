@@ -1,10 +1,10 @@
 "use server";
 import "server-only";
 import prisma from "@/lib/prisma";
-import { WalletList } from "@/viewModels/walletList";
+import { WalletListViewModel } from "@/viewModels/walletList";
 import { getUserId } from "@/lib/session";
 
-export async function walletList(): Promise<WalletList> {
+export async function walletList(): Promise<WalletListViewModel> {
   const userId = await getUserId();
 
   if (!userId) {

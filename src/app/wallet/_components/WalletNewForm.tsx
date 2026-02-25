@@ -1,22 +1,30 @@
 "use client";
 
-import { walletNewSchema } from "@/schemas/walletNewSchema";
+import { walletSchema } from "@/schemas/walletNewSchema";
 import { walletCreate } from "@/serverActions/walletCreate";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { use, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export type WalletNewFormValues = z.infer<typeof walletNewSchema>;
+export type WalletFormValues = z.infer<typeof walletSchema>;
 
-export default function WalletNewForm() {
+interface WalletFormProps {
+  isNew: boolean;
+  walletPromise?: Promise<WalletFormValues>;
+}
+
+export default function WalletForm({ isNew, walletPromise }: WalletFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<WalletNewFormValues>({
-    resolver: zodResolver(walletNewSchema),
-    defaultValues: {
-      name: "",
-    },
+  let wallet: WalletFormValues | undefined;
+  if (!isNew && walletPromise) {
+    wallet = use(walletPromise);
+  }
+
+  const form = useForm<WalletFormValues>({
+    resolver: zodResolver(walletSchema),
+    defaultValues: wallet,
     mode: "onSubmit",
   });
 
@@ -42,7 +50,7 @@ export default function WalletNewForm() {
   return (
     <form onSubmit={submitHandler}>
       <fieldset disabled={isSubmitting}>
-        <legend>New wallet</legend>
+        <legend>{isNew ? "New wallet" : "Edit wallet"}</legend>
 
         <div>
           <label htmlFor="name">Wallet name</label>
@@ -53,7 +61,11 @@ export default function WalletNewForm() {
         {submitError && <p>{submitError}</p>}
 
         <button type="submit">
-          {isSubmitting ? "Saving..." : "Create wallet"}
+          {isSubmitting
+            ? "Saving..."
+            : isNew
+              ? "Create wallet"
+              : "Update wallet"}
         </button>
       </fieldset>
     </form>

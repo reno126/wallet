@@ -1,8 +1,8 @@
-interface Wallet {
+export interface WalletViewModel {
   id: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type WalletList = Wallet[];
+export type WalletListViewModel = WalletViewModel[];
