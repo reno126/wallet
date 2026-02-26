@@ -1,6 +1,6 @@
 import AssetNewForm from "../_components/AssetNewForm";
 
-export default async function WalletAssetNewPage({
+export default async function AssetNewPage({
   params,
 }: {
   params: Promise<{ id: string }>;
