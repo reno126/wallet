@@ -39,11 +39,6 @@ export async function assetCreate(
         name,
         ticker,
         currency,
-        lastPrice: props.lastPrice,
-        priceUpdatedAt: props.priceUpdatedAt,
-        totalQuantity: props.totalQuantity,
-        purchaseValue: props.purchaseValue,
-        currentValue: props.currentValue,
       },
     });
   } catch (error) {
