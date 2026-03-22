@@ -7,6 +7,7 @@ import { isAssetOwner } from "@/lib/helper/isAssetOwner";
 import z from "zod";
 import { getUserId } from "@/lib/session";
 import { assetHistoryNewSchema } from "@/schemas/assetHistoryNewSchema";
+import Big from "big.js";
 
 export type AssetHistoryCreateAction = typeof assetHistoryCreate;
 
@@ -19,7 +20,7 @@ export async function assetHistoryCreate(
     throw new Error("Unauthorized");
   }
 
-  if (!isAssetOwner(props.assetId, userId)) {
+  if (!(await isAssetOwner(props.assetId, userId))) {
     throw new Error("This is not your asset.");
   }
 
@@ -29,32 +30,65 @@ export async function assetHistoryCreate(
     throw new Error(validation.error.name);
   }
 
+  const updatedAsset = await assetHistoryCreateTransaction(props);
+
+  redirect("/wallet/" + updatedAsset.walletId);
+}
+
+async function assetHistoryCreateTransaction(
+  props: Readonly<z.infer<typeof assetHistoryNewSchema>>,
+) {
   try {
-    await prisma.assetHistory.create({ data: props });
-
-    await prisma.$transaction(async (tx) => {
-      // 1. Aktualizacja dziecka
-      const updatedChild = await tx.child.update({
-        where: { id: childId },
-        data: { quantity: newQuantity },
+    return prisma.$transaction(async (tx) => {
+      const asset = await tx.asset.findUniqueOrThrow({
+        where: { id: props.assetId },
+        select: { totalQuantity: true, purchaseValue: true, walletId: true },
       });
 
-      // 2. Pobierz wszystkie dzieci tego rodzica
-      const allChildren = await tx.child.findMany({
-        where: { parentId: updatedChild.parentId },
+      const priceInput = Big(props.price);
+      const quantityInput = Big(props.quantity);
+
+      const currentQty = Big(asset.totalQuantity ?? 0);
+      const currentPurchaseValue = Big(asset.purchaseValue ?? 0);
+
+      let nextQty: Big;
+      let nextPurchase: Big;
+
+      if (props.operationType === "BUY") {
+        nextQty = currentQty.plus(quantityInput);
+        nextPurchase = currentPurchaseValue.plus(
+          priceInput.times(quantityInput),
+        );
+      } else {
+        if (currentQty.lt(quantityInput)) {
+          throw new Error("Sell below current quantity.");
+        }
+
+        nextQty = currentQty.minus(quantityInput);
+        nextPurchase = currentPurchaseValue.minus(
+          priceInput.times(quantityInput),
+        );
+      }
+
+      await tx.assetHistory.create({
+        data: {
+          assetId: props.assetId,
+          price: priceInput.toNumber(),
+          quantity: quantityInput.toNumber(),
+          operationType: props.operationType,
+          date: props.date,
+        },
       });
 
-      // 3. Oblicz nową sumę
-      const newTotal = allChildren.reduce(
-        (sum, c) => sum + c.price * c.quantity,
-        0,
-      );
-
-      // 4. Zaktualizuj rodzica
-      await tx.parent.update({
-        where: { id: updatedChild.parentId },
-        data: { totalValue: newTotal },
+      const updatedAsset = await tx.asset.update({
+        where: { id: props.assetId },
+        data: {
+          totalQuantity: nextQty.toNumber(),
+          purchaseValue: nextPurchase.toNumber(),
+        },
       });
+
+      return updatedAsset;
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -66,6 +100,4 @@ export async function assetHistoryCreate(
       "Unknown error occurred while creating assetHistory. Please try again.",
     );
   }
-
-  // redirect("/wallet/" + walletId);
 }
