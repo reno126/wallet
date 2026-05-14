@@ -1,26 +1,25 @@
 "use server";
 import "server-only";
 import prisma from "@/lib/prisma";
-import { WalletListViewModel } from "@/viewModels/walletList";
+import { WalletList } from "@/viewModels/walletList";
 import { getUserId } from "@/lib/session";
 
-export async function walletList(): Promise<WalletListViewModel> {
+export async function walletList(): Promise<WalletList> {
   const userId = await getUserId();
 
   if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  const walletsRaw = await prisma.wallet.findMany({
+  return await prisma.wallet.findMany({
     where: {
       userId: userId,
     },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
-
-  return walletsRaw.map((wallet) => ({
-    id: wallet.id,
-    name: wallet.name,
-    createdAt: wallet.createdAt,
-    updatedAt: wallet.updatedAt,
-  }));
 }

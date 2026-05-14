@@ -5,10 +5,10 @@ import { Suspense } from "react";
 export default async function WalletEditPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ walletId: string }>;
 }) {
-  const { id } = await params;
-  const wallet = walletGet(id);
+  const { walletId } = await params;
+  const wallet = walletGet(walletId);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
       <h1 className="mb-4 text-3xl font-bold">Edit Wallet page</h1>

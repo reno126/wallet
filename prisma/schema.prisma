@@ -95,12 +95,12 @@ model Asset {
   wallet         Wallet         @relation(fields: [walletId], references: [id], onDelete: Cascade)
   ticker         String
   name           String
-  lastPrice      Decimal?       @db.Decimal(18, 8)
+  lastPrice      Float?
   priceUpdatedAt DateTime?
   currency       String
-  totalQuantity  Decimal?       @db.Decimal(18, 8)
-  purchaseValue  Decimal?       @db.Decimal(18, 8)
-  currentValue   Decimal?       @db.Decimal(18, 8)
+  totalQuantity  Float?
+  purchaseValue  Float?
+  currentValue   Float?
   history        AssetHistory[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -113,10 +113,10 @@ model AssetHistory {
   id            String        @id @default(cuid())
   assetId       String
   asset         Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  price         Decimal       @db.Decimal(18, 8)
-  quantity      Decimal       @db.Decimal(18, 8)
+  price         Float
+  quantity      Float
   operationType OperationType
-  date          DateTime      @default(now())
+  date          DateTime
   createdAt     DateTime      @default(now())
 
   @@index([assetId])

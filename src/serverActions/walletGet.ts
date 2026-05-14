@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
-import { WalletViewModel } from "@/viewModels/walletList";
+import { Wallet } from "@/viewModels/walletList";
 
 export async function walletGet(
   walletId: string,
-): Promise<Pick<WalletViewModel, "name">> {
+): Promise<Pick<Wallet, "name">> {
   const queryResult = await prisma.wallet.findUnique({
     where: {
       id: walletId,

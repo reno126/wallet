@@ -1,11 +1,11 @@
 "use client";
-import { WalletListViewModel } from "@/viewModels/walletList";
+import { WalletList } from "@/viewModels/walletList";
 import Link from "next/link";
 import { use } from "react";
 import { Fragment } from "react/jsx-runtime";
 
 interface WalletListGridProps {
-  wallets: Promise<WalletListViewModel>;
+  wallets: Promise<WalletList>;
 }
 
 export function WalletListGrid({ wallets }: WalletListGridProps) {
